@@ -30,3 +30,15 @@ class SocialProfileImagePickedErrorState extends SocialMainState {}
 class SocialCoverImagePickedSuccessState extends SocialMainState {}
 
 class SocialCoverImagePickedErrorState extends SocialMainState {}
+
+class SocialUploadCoverImageSuccessState extends SocialMainState {}
+
+class SocialUploadCoverImageErrorState extends SocialMainState {}
+
+class SocialUploadProfileImageSuccessState extends SocialMainState {}
+
+class SocialUploadProfileImageErrorState extends SocialMainState {}
+
+class SocialUpdateUserDataErroeState extends SocialMainState {}
+
+class SocialLoadingUpdateUserDataState extends SocialMainState {}

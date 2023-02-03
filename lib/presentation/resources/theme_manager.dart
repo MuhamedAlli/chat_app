@@ -56,7 +56,7 @@ ThemeData getApplicationTheme() {
       headlineMedium:
           getRegularStyle(color: ColorManager.grey, fontSize: AppSize.s18),
       titleMedium:
-          getMediumStyle(color: ColorManager.black, fontSize: AppSize.s18),
+          getRegularStyle(color: ColorManager.black, fontSize: AppSize.s16),
       titleSmall:
           getRegularStyle(color: ColorManager.white, fontSize: AppSize.s18),
       labelSmall:

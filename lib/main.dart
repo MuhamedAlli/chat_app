@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: getApplicationTheme(),
-      initialRoute: Routes.loginRoute,
+      initialRoute: Routes.mainRoute,
       onGenerateRoute: RouteGenerator.getRoute,
       /*home: uidValue != null
           ? BlocProvider(

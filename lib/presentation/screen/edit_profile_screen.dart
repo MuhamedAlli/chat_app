@@ -26,7 +26,12 @@ class EditProfileScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              BlocProvider.of<SocialMainCubit>(context).updateUserData(
+                  nameController.text,
+                  bioController.text,
+                  phoneController.text);
+            },
             child: Text(
               "UPDATE",
               style: Theme.of(context)
@@ -57,6 +62,12 @@ class EditProfileScreen extends StatelessWidget {
 
             return Column(
               children: [
+                if (state is SocialLoadingUpdateUserDataState)
+                  const LinearProgressIndicator(),
+                if (state is SocialLoadingUpdateUserDataState)
+                  const SizedBox(
+                    height: 10.0,
+                  ),
                 SizedBox(
                   height: 200,
                   child: Stack(

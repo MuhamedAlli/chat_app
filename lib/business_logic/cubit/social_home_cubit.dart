@@ -14,7 +14,7 @@ import '../../data/models/models.dart';
 import '../../presentation/screen/add_post_screen.dart';
 import '../../presentation/screen/users_screen.dart';
 import '../../shared_component/di.dart';
-
+import 'package:firebase_storage/firebase_storage.dart';
 part 'social_home_state.dart';
 
 class SocialMainCubit extends Cubit<SocialMainState> {
@@ -73,7 +73,7 @@ class SocialMainCubit extends Cubit<SocialMainState> {
       profileImage = File(image.path);
       emit(SocialProfileImagePickedSuccessState());
     } else {
-      print("No image selected..!");
+      //print("No image selected..!");
       emit(SocialProfileImagePickedErrorState());
     }
   }
@@ -86,8 +86,124 @@ class SocialMainCubit extends Cubit<SocialMainState> {
       coverImage = File(image.path);
       emit(SocialCoverImagePickedSuccessState());
     } else {
-      print("No image selected..!");
+      //print("No image selected..!");
       emit(SocialCoverImagePickedErrorState());
     }
+  }
+
+  String profileImageUrl = '';
+
+  Future<String> uplaodProfileImage() async {
+    try {
+      TaskSnapshot taskSnapshot = await FirebaseStorage.instance
+          .ref()
+          .child("users/${Uri.file(profileImage!.path).pathSegments.last}")
+          .putFile(profileImage!);
+      profileImageUrl = await taskSnapshot.ref.getDownloadURL();
+      print(profileImageUrl);
+      emit(SocialUploadProfileImageSuccessState());
+      return profileImageUrl;
+    } catch (error) {
+      emit(SocialUploadProfileImageErrorState());
+      return userModel!.image!;
+    }
+  }
+
+  String coverImageUrl = '';
+  Future<String> uplaodCoverImage() async {
+    try {
+      TaskSnapshot taskSnapshot = await FirebaseStorage.instance
+          .ref()
+          .child("users/${Uri.file(coverImage!.path).pathSegments.last}")
+          .putFile(coverImage!);
+      coverImageUrl = await taskSnapshot.ref.getDownloadURL();
+      print(coverImageUrl);
+      emit(SocialUploadCoverImageSuccessState());
+      return coverImageUrl;
+    } catch (error) {
+      emit(SocialUploadCoverImageErrorState());
+      return userModel!.cover!;
+    }
+  }
+
+  void updateUserData(String username, String bio, String phone) async {
+    emit(SocialLoadingUpdateUserDataState());
+    if (coverImage != null && profileImage != null) {
+      profileImageUrl = await uplaodProfileImage();
+      coverImageUrl = await uplaodCoverImage();
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userModel!.uid)
+          .update({
+        "image": profileImageUrl,
+        "cover": coverImageUrl,
+      }).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    } else if (coverImage != null) {
+      coverImageUrl = await uplaodCoverImage();
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userModel!.uid)
+          .update({
+        "cover": coverImageUrl,
+      }).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    } else if (profileImage != null) {
+      profileImageUrl = await uplaodProfileImage();
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userModel!.uid)
+          .update({
+        "image": profileImageUrl,
+      }).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    }
+    /*else if (coverImage != null) {
+      uplaodCoverImage();
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userModel!.uid)
+          .update({
+        "cover": coverImageUrl,
+        "bio": bio,
+        "username": username,
+        "phone": phone
+      }).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    } else if (profileImage != null && coverImage != null) {
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(userModel!.uid)
+          .update({
+        "cover": coverImageUrl,
+        "image": profileImageUrl,
+        "bio": bio,
+        "username": username,
+        "phone": phone
+      }).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    } else {
+      FirebaseFirestore.instance.collection("users").doc(userModel!.uid).update(
+          {"bio": bio, "username": username, "phone": phone}).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    }*/
   }
 }
