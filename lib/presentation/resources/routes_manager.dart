@@ -16,7 +16,7 @@ class Routes {
   static const String registerRoute = "/registerRoute";
   static const String mainRoute = "/mainRoute";
   static const String homeRoute = "/homeRoute";
-  static const String addPostroute = "/addPostroute";
+  static const String addPostRoute = "/addPostRoute";
   static const String editProfileScreen = "/editProfileScreen";
 
   static const String storeDetailsRoute = "/storeDetailsRoute";
@@ -35,7 +35,7 @@ class RouteGenerator {
       case Routes.mainRoute:
         return MaterialPageRoute(
           builder: ((_) => BlocProvider(
-                create: (context) => SocialMainCubit(),
+                create: (context) => SocialMainCubit()..getPosts()..getUserData(),
                 child: const MainScreen(),
               )),
         );
@@ -46,9 +46,12 @@ class RouteGenerator {
                 child: EditProfileScreen(),
               )),
         );
-      case Routes.addPostroute:
+      case Routes.addPostRoute:
         return MaterialPageRoute(
-          builder: ((_) => const AddPostScreen()),
+          builder: ((_) => BlocProvider(
+                create: (context) => SocialMainCubit(),
+                child: AddPostScreen(),
+              )),
         );
       case Routes.registerRoute:
         return MaterialPageRoute(

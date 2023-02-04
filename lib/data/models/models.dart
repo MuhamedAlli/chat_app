@@ -42,3 +42,40 @@ class UserModel {
     };
   }
 }
+
+class PostModel {
+  String? username;
+  String? uid;
+  String? image;
+  String? dateTime;
+  String? text;
+  String? postImage;
+  PostModel({
+    required this.username,
+    required this.uid,
+    required this.image,
+    required this.dateTime,
+    required this.text,
+    required this.postImage,
+  });
+
+  PostModel.fromJson(Map<String, dynamic> json) {
+    username = json["username"];
+    uid = json["uid"];
+    image = json["image"];
+    dateTime = json["dateTime"];
+    text = json["text"];
+    postImage = json["postImage"];
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "username": username,
+      "uid": uid,
+      "image": image,
+      "dateTime": dateTime,
+      "text": text,
+      "postImage": postImage,
+    };
+  }
+}

@@ -49,7 +49,7 @@ class SocialMainCubit extends Cubit<SocialMainState> {
   List<Widget> widgets = [
     const HomeScreen(),
     const ChatScreen(),
-    const AddPostScreen(),
+    AddPostScreen(),
     const UsersScreen(),
     const ProfileScreen(),
   ];
@@ -137,6 +137,9 @@ class SocialMainCubit extends Cubit<SocialMainState> {
           .update({
         "image": profileImageUrl,
         "cover": coverImageUrl,
+        "bio": bio,
+        "username": username,
+        "phone": phone
       }).then((value) {
         getUserData();
       }).catchError((error) {
@@ -162,6 +165,13 @@ class SocialMainCubit extends Cubit<SocialMainState> {
           .update({
         "image": profileImageUrl,
       }).then((value) {
+        getUserData();
+      }).catchError((error) {
+        emit(SocialUpdateUserDataErroeState());
+      });
+    } else {
+      FirebaseFirestore.instance.collection("users").doc(userModel!.uid).update(
+          {"bio": bio, "username": username, "phone": phone}).then((value) {
         getUserData();
       }).catchError((error) {
         emit(SocialUpdateUserDataErroeState());
@@ -205,5 +215,116 @@ class SocialMainCubit extends Cubit<SocialMainState> {
         emit(SocialUpdateUserDataErroeState());
       });
     }*/
+  }
+
+  //create post with image and without image
+
+  File? postImage;
+  Future<void> getPostImage() async {
+    // Pick an image
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      postImage = File(image.path);
+      emit(SocialPostImagePickedSuccessState());
+    } else {
+      //print("No image selected..!");
+      emit(SocialPostImagePickedErrorState());
+    }
+  }
+
+  String postImageUrl = '';
+  Future<String> uplaodPostImage() async {
+    try {
+      TaskSnapshot taskSnapshot = await FirebaseStorage.instance
+          .ref()
+          .child("posts/${Uri.file(postImage!.path).pathSegments.last}")
+          .putFile(postImage!);
+      postImageUrl = await taskSnapshot.ref.getDownloadURL();
+      print(postImageUrl);
+      emit(SocialUploadPostImageSuccessState());
+      return postImageUrl;
+    } catch (error) {
+      emit(SocialUploadPostImageErrorState());
+      return "";
+    }
+  }
+
+  void removePostImgae() {
+    postImage = null;
+    emit(SocialRemovePostImagePickedErrorState());
+  }
+
+  void createPost(String postBody, String dateTime, String username, String uid,
+      String image) async {
+    emit(SocialLoadingCreatePostState());
+
+    if (postImage != null) {
+      String postImageUrl = await uplaodPostImage();
+      PostModel postModel = PostModel(
+          username: userModel!.username ?? "",
+          uid: userModel!.uid ?? "",
+          image: userModel!.image ?? "",
+          dateTime: dateTime,
+          text: postBody,
+          postImage: postImageUrl);
+
+      FirebaseFirestore.instance
+          .collection('posts')
+          .add(postModel.toMap())
+          .then((value) {
+        emit(SocialCreatePostSuccessState());
+      }).catchError((error) {
+        emit(SocialCreatePostErrorState());
+      });
+    } else {
+      PostModel postModel = PostModel(
+          username: userModel!.username ?? "",
+          uid: userModel!.uid ?? "",
+          image: userModel!.image ?? "",
+          dateTime: dateTime,
+          text: postBody,
+          postImage: postImageUrl);
+
+      FirebaseFirestore.instance
+          .collection('posts')
+          .add(postModel.toMap())
+          .then((value) {
+        emit(SocialCreatePostSuccessState());
+      }).catchError((error) {
+        emit(SocialCreatePostErrorState());
+      });
+    }
+  }
+
+  List<PostModel> posts = [];
+
+  List<String> postId = [];
+  List<int> likes = [];
+  void getPosts() {
+    FirebaseFirestore.instance.collection('posts').get().then((value) {
+      value.docs.forEach((element) {
+        element.reference.collection('likes').get().then((value) {
+          likes.add(value.docs.length);
+          postId.add(element.id);
+          posts.add(PostModel.fromJson(element.data()));
+        }).catchError((error) {});
+      });
+      emit(SocialGetPostSuccessState());
+    }).catchError((error) {
+      emit(SocialGetPostErrorState(error.toString()));
+    });
+  }
+
+  void likePost(String postId) {
+    FirebaseFirestore.instance
+        .collection('posts')
+        .doc(postId)
+        .collection('likes')
+        .doc(userModel!.uid)
+        .set({'like': true}).then((value) {
+      emit(SocialLikePostSuccessState());
+    }).catchError((error) {
+      emit(SocialLikePostErrorState(error));
+    });
   }
 }

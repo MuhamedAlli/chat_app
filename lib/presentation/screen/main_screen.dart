@@ -19,7 +19,7 @@ class MainScreen extends StatelessWidget {
           Navigator.of(context).pushReplacementNamed(Routes.loginRoute);
         }
         if (state is SocialAddPostState) {
-          Navigator.of(context).pushNamed(Routes.addPostroute);
+          Navigator.of(context).pushNamed(Routes.addPostRoute);
         }
       },
       builder: (context, state) {

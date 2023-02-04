@@ -1,52 +1,77 @@
+import 'package:chat_app/business_logic/cubit/social_home_cubit.dart';
+import 'package:chat_app/data/models/models.dart';
 import 'package:chat_app/shared_component/icon_broken.dart';
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      child: Column(
-        children: [
-          Card(
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            elevation: 5.0,
-            margin: const EdgeInsets.all(8.0),
-            child: Stack(
-              alignment: AlignmentDirectional.topStart,
-              children: [
-                Image.network(
-                  "https://img.freepik.com/free-photo/full-shot-travel-concept-with-landmarks_23-2149153258.jpg?3&w=826&t=st=1675261907~exp=1675262507~hmac=538631e233852f81b5d178c2aca17fdc6eb433d9f5aa6e832011ed8ab767448d",
-                  fit: BoxFit.cover,
-                  height: 200,
-                  width: double.infinity,
+    return BlocConsumer<SocialMainCubit, SocialMainState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return ConditionalBuilder(
+            condition:
+                BlocProvider.of<SocialMainCubit>(context).posts.isNotEmpty,
+            builder: (context) {
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    Card(
+                      clipBehavior: Clip.antiAliasWithSaveLayer,
+                      elevation: 5.0,
+                      margin: const EdgeInsets.all(8.0),
+                      child: Stack(
+                        alignment: AlignmentDirectional.topStart,
+                        children: [
+                          Image.network(
+                            "https://img.freepik.com/free-photo/full-shot-travel-concept-with-landmarks_23-2149153258.jpg",
+                            fit: BoxFit.cover,
+                            height: 200,
+                            width: double.infinity,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              "Communicate with friends",
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        return buildPostItem(
+                            BlocProvider.of<SocialMainCubit>(context)
+                                .posts[index],
+                            context,
+                            index);
+                      },
+                      itemCount: BlocProvider.of<SocialMainCubit>(context)
+                          .posts
+                          .length,
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Text(
-                    "Communicate with friends",
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, inde) {
-              return buildPostItem(context);
+              );
             },
-            itemCount: 15,
-          ),
-        ],
-      ),
+            fallback: (context) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            });
+      },
     );
   }
 
-  Widget buildPostItem(BuildContext context) {
+  Widget buildPostItem(PostModel postModel, BuildContext context, int index) {
     return Card(
       clipBehavior: Clip.antiAliasWithSaveLayer,
       elevation: 3.0,
@@ -58,10 +83,10 @@ class HomeScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 25.0,
                   backgroundImage: NetworkImage(
-                    "https://img.freepik.com/free-photo/smiley-little-boy-isolated-pink_23-2148984798.jpg?w=740&t=st=1675254193~exp=1675254793~hmac=9e3d1f8f16503aaea609d22c0e66687efa45e33523d8c75e08fa99dd7e2ed64d",
+                    postModel.image!,
                   ),
                 ),
                 const SizedBox(
@@ -72,15 +97,16 @@ class HomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Mohammed Ali",
+                        postModel.username!,
                         textAlign: TextAlign.start,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                               fontWeight: FontWeight.bold,
                               height: 1.3,
+                              fontSize: 18,
                             ),
                       ),
                       Text(
-                        "February 1,2023 at 03:00 PM",
+                        postModel.dateTime!,
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge!
@@ -105,21 +131,28 @@ class HomeScreen extends StatelessWidget {
                 color: Colors.grey,
               ),
             ),
-            Text(
-              "Lorem ipsum, or lipsum as it is , is dummy text used in laying out print, graphic or web designs. The passage is attributed to an unknown typesetter in the 15th century who is thought to have scrambled parts of Cicero's De Finibus Bonorum et Malorum for use in a type specimen book. ",
-              style:
-                  Theme.of(context).textTheme.bodyLarge!.copyWith(height: 1.3),
-            ),
-            Card(
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              margin: const EdgeInsets.only(top: 8.0),
-              child: Image.network(
-                "https://img.freepik.com/free-photo/social-media-concept-with-smartphone_52683-100042.jpg?w=740&t=st=1675251935~exp=1675252535~hmac=0b02edf56811a9330fd6e7c449872d0f7fa6ee52740ffe6687e7e617c2c0e6e7",
-                fit: BoxFit.cover,
-                height: 140,
-                width: double.infinity,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                postModel.text!,
+                textAlign: TextAlign.start,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge!
+                    .copyWith(height: 1.3),
               ),
             ),
+            if (postModel.postImage!.isNotEmpty)
+              Card(
+                clipBehavior: Clip.antiAliasWithSaveLayer,
+                margin: const EdgeInsets.only(top: 8.0),
+                child: Image.network(
+                  postModel.postImage!,
+                  fit: BoxFit.cover,
+                  height: 140,
+                  width: double.infinity,
+                ),
+              ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -133,7 +166,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "120",
+                      BlocProvider.of<SocialMainCubit>(context).likes[index].toString(),
                       style: Theme.of(context)
                           .textTheme
                           .bodyLarge!
@@ -151,7 +184,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "120 comments",
+                      "0 comments",
                       style: Theme.of(context)
                           .textTheme
                           .bodyLarge!
@@ -170,10 +203,12 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 15.0,
                       backgroundImage: NetworkImage(
-                        "https://img.freepik.com/free-photo/smiley-little-boy-isolated-pink_23-2148984798.jpg?w=740&t=st=1675254193~exp=1675254793~hmac=9e3d1f8f16503aaea609d22c0e66687efa45e33523d8c75e08fa99dd7e2ed64d",
+                        BlocProvider.of<SocialMainCubit>(context)
+                            .userModel!
+                            .image!,
                       ),
                     ),
                     const SizedBox(
@@ -190,7 +225,11 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        BlocProvider.of<SocialMainCubit>(context).likePost(
+                            BlocProvider.of<SocialMainCubit>(context)
+                                .postId[index]);
+                      },
                       icon: const Icon(
                         IconBroken.Heart,
                         color: Colors.red,

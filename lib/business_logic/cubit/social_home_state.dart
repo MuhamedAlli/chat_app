@@ -42,3 +42,37 @@ class SocialUploadProfileImageErrorState extends SocialMainState {}
 class SocialUpdateUserDataErroeState extends SocialMainState {}
 
 class SocialLoadingUpdateUserDataState extends SocialMainState {}
+//picked post image
+
+class SocialPostImagePickedSuccessState extends SocialMainState {}
+
+class SocialPostImagePickedErrorState extends SocialMainState {}
+
+class SocialRemovePostImagePickedErrorState extends SocialMainState {}
+
+//upload post image
+class SocialUploadPostImageSuccessState extends SocialMainState {}
+
+class SocialUploadPostImageErrorState extends SocialMainState {}
+
+//Create post
+class SocialLoadingCreatePostState extends SocialMainState {}
+
+class SocialCreatePostSuccessState extends SocialMainState {}
+
+class SocialCreatePostErrorState extends SocialMainState {}
+//get posts
+
+class SocialGetPostSuccessState extends SocialMainState {}
+
+class SocialGetPostErrorState extends SocialMainState {
+ final String error;
+  SocialGetPostErrorState(this.error);
+}
+//like post
+class SocialLikePostSuccessState extends SocialMainState {}
+
+class SocialLikePostErrorState extends SocialMainState {
+  final String error;
+  SocialLikePostErrorState(this.error);
+}
