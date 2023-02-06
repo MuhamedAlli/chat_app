@@ -20,7 +20,7 @@ part 'social_home_state.dart';
 class SocialMainCubit extends Cubit<SocialMainState> {
   SocialMainCubit() : super(SocialMainInitial());
   UserModel? userModel;
-  void getUserData() async {
+  Future<void> getUserData() async {
     emit(SocialMainLoadingState());
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
@@ -30,11 +30,28 @@ class SocialMainCubit extends Cubit<SocialMainState> {
       //print(documentSnapshot.data());
       userModel =
           UserModel.fromJson(documentSnapshot.data() as Map<String, dynamic>);
-      //print(userModel!.username);
+      //print(userModel!.uid);
       emit(SocialMainSuccessState(userModel!));
     } catch (error) {
       emit(SocialMainFailureState(error.toString()));
     }
+  }
+
+//get All users
+  List<UserModel> allUsers = [];
+  Future<void> getAllUser() async {
+    allUsers = [];
+    FirebaseFirestore.instance.collection("users").get().then((value) {
+      value.docs.forEach((element) {
+        //print(element.data());
+        if (element.data()['uid'] != userModel!.uid) {
+          allUsers.add(UserModel.fromJson(element.data()));
+        }
+      });
+      emit(SocialGetAllUsersSuccessState());
+    }).catchError((error) {
+      emit(SocialGetAllUsersErrorState(error.toString()));
+    });
   }
 
   AppPreferences appPreferences = instance();
@@ -55,7 +72,12 @@ class SocialMainCubit extends Cubit<SocialMainState> {
   ];
   List<String> titles = ["Home", "Chats", "Add Post", "Users", "Profile"];
   int currentIndex = 0;
-  void changeCurrentIndex(int ind) {
+  void changeCurrentIndex(int ind) async {
+    //getUserData();
+    if (ind == 1) {
+      await getAllUser();
+    }
+
     if (ind == 2) {
       emit(SocialAddPostState());
     } else {
@@ -100,7 +122,7 @@ class SocialMainCubit extends Cubit<SocialMainState> {
           .child("users/${Uri.file(profileImage!.path).pathSegments.last}")
           .putFile(profileImage!);
       profileImageUrl = await taskSnapshot.ref.getDownloadURL();
-      print(profileImageUrl);
+      //print(profileImageUrl);
       emit(SocialUploadProfileImageSuccessState());
       return profileImageUrl;
     } catch (error) {
@@ -117,7 +139,7 @@ class SocialMainCubit extends Cubit<SocialMainState> {
           .child("users/${Uri.file(coverImage!.path).pathSegments.last}")
           .putFile(coverImage!);
       coverImageUrl = await taskSnapshot.ref.getDownloadURL();
-      print(coverImageUrl);
+      //print(coverImageUrl);
       emit(SocialUploadCoverImageSuccessState());
       return coverImageUrl;
     } catch (error) {
@@ -177,44 +199,6 @@ class SocialMainCubit extends Cubit<SocialMainState> {
         emit(SocialUpdateUserDataErroeState());
       });
     }
-    /*else if (coverImage != null) {
-      uplaodCoverImage();
-      FirebaseFirestore.instance
-          .collection("users")
-          .doc(userModel!.uid)
-          .update({
-        "cover": coverImageUrl,
-        "bio": bio,
-        "username": username,
-        "phone": phone
-      }).then((value) {
-        getUserData();
-      }).catchError((error) {
-        emit(SocialUpdateUserDataErroeState());
-      });
-    } else if (profileImage != null && coverImage != null) {
-      FirebaseFirestore.instance
-          .collection("users")
-          .doc(userModel!.uid)
-          .update({
-        "cover": coverImageUrl,
-        "image": profileImageUrl,
-        "bio": bio,
-        "username": username,
-        "phone": phone
-      }).then((value) {
-        getUserData();
-      }).catchError((error) {
-        emit(SocialUpdateUserDataErroeState());
-      });
-    } else {
-      FirebaseFirestore.instance.collection("users").doc(userModel!.uid).update(
-          {"bio": bio, "username": username, "phone": phone}).then((value) {
-        getUserData();
-      }).catchError((error) {
-        emit(SocialUpdateUserDataErroeState());
-      });
-    }*/
   }
 
   //create post with image and without image
@@ -240,7 +224,7 @@ class SocialMainCubit extends Cubit<SocialMainState> {
           .child("posts/${Uri.file(postImage!.path).pathSegments.last}")
           .putFile(postImage!);
       postImageUrl = await taskSnapshot.ref.getDownloadURL();
-      print(postImageUrl);
+      //print(postImageUrl);
       emit(SocialUploadPostImageSuccessState());
       return postImageUrl;
     } catch (error) {
@@ -325,6 +309,75 @@ class SocialMainCubit extends Cubit<SocialMainState> {
       emit(SocialLikePostSuccessState());
     }).catchError((error) {
       emit(SocialLikePostErrorState(error));
+    });
+  }
+
+  void sendMessage(String receiverId, String dateTime, String text) {
+    getUserData();
+    MessageModel messageModel = MessageModel(
+        senderId: userModel!.uid,
+        receiverId: receiverId,
+        dateTime: dateTime,
+        text: text);
+//send message to sender database
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModel!.uid)
+        .collection('chats')
+        .doc(receiverId)
+        .collection('messages')
+        .add(messageModel.toMap())
+        .then((value) {
+      //emit(SocialSendMessageSuccessState());
+    }).catchError((error) {
+      //emit(SocialSendMessageErrorState());
+    });
+//send message to receiver database
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(receiverId)
+        .collection('chats')
+        .doc(userModel!.uid)
+        .collection('messages')
+        .add(messageModel.toMap())
+        .then((value) {
+      value.id;
+      emit(SocialSendMessageSuccessState());
+    }).catchError((error) {
+      emit(SocialSendMessageErrorState());
+    });
+  }
+
+  String id = '';
+  List<MessageModel> messages = [];
+  void getMessages(String receiverId) async {
+    //print("uId of me ::  ${userModel!.uid}");
+    await getUserData();
+    if (userModel != null) {
+      id = userModel!.uid!;
+    }
+    //print(id);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(userModel!.uid)
+        .collection('chats')
+        .doc(receiverId)
+        .collection('messages')
+        .orderBy("dateTime")
+        .snapshots()
+        .listen((event) {
+      //print(event.docs.length);
+      messages = [];
+      event.docs.forEach(
+        (element) {
+          messages.add(MessageModel.fromJson(element.data()));
+        },
+      );
+      emit(SocialGetMessageSuccessState(messages));
+      //print("From Cubit ${messages.length}");
+
+      emit(SocialGetMessageSuccessState(messages));
+      //print("From Cubit ${messages.length}");
     });
   }
 }

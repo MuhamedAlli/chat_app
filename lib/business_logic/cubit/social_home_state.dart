@@ -69,6 +69,14 @@ class SocialGetPostErrorState extends SocialMainState {
  final String error;
   SocialGetPostErrorState(this.error);
 }
+//get all users
+
+class SocialGetAllUsersSuccessState extends SocialMainState {}
+
+class SocialGetAllUsersErrorState extends SocialMainState {
+  final String error;
+  SocialGetAllUsersErrorState(this.error);
+}
 //like post
 class SocialLikePostSuccessState extends SocialMainState {}
 
@@ -76,3 +84,15 @@ class SocialLikePostErrorState extends SocialMainState {
   final String error;
   SocialLikePostErrorState(this.error);
 }
+//send message
+class SocialSendMessageSuccessState extends SocialMainState {}
+
+class SocialSendMessageErrorState extends SocialMainState {}
+
+//Get message
+class SocialGetMessageSuccessState extends SocialMainState {
+final  List<MessageModel> messages ;
+  SocialGetMessageSuccessState(this.messages);
+}
+
+class SocialGetMessageErrorState extends SocialMainState {}

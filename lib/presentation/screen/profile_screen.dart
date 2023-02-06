@@ -34,7 +34,8 @@ class ProfileScreen extends StatelessWidget {
                             topLeft: Radius.circular(5.0),
                           ),
                           image: DecorationImage(
-                              image: NetworkImage(model!.cover!),
+                              image: NetworkImage(
+                                  model == null ? "" : model.cover ?? ""),
                               fit: BoxFit.cover),
                         ),
                       ),
@@ -46,7 +47,7 @@ class ProfileScreen extends StatelessWidget {
                       child: CircleAvatar(
                         radius: 45.0,
                         backgroundImage: NetworkImage(
-                          model.image!,
+                          model == null ? "" : model.image ?? "",
                         ),
                       ),
                     ),
@@ -54,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                model.username!,
+                model == null ? "" : model.username ?? "",
                 style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                       fontWeight: FontWeight.bold,
                       height: 1.3,
@@ -65,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
                 height: 8,
               ),
               Text(
-                model.bio!,
+                model == null ? "" : model.bio ?? "",
                 style: Theme.of(context)
                     .textTheme
                     .labelLarge!

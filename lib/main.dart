@@ -4,11 +4,22 @@ import 'package:flutter/material.dart';
 import 'presentation/resources/routes_manager.dart';
 import 'shared_component/di.dart';
 import 'shared_component/preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initAppModule();
   await Firebase.initializeApp();
+  FirebaseMessaging.onMessage.listen((event) {
+    print(event.data.toString());
+  }).onError((error) {
+    print(error);
+  });
+  FirebaseMessaging.onMessageOpenedApp.listen((event) {
+    print(event.data);
+  }).onError((error) {
+    print(error);
+  });
   AppPreferences appPreferences = instance();
   uidValue = appPreferences.getUid();
   //String initialRoute = Routes.loginRoute;

@@ -162,8 +162,9 @@ class RegisterScreen extends StatelessWidget {
           showLoaderDialog(context);
         }
         if (state is RegisterSuccessState) {
-          Navigator.of(context).pushNamed(Routes.homeRoute);
+          Navigator.of(context).pushNamed(Routes.mainRoute);
         }else if (state is RegisterFailureState) {
+          Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               duration: const Duration(seconds: 4),

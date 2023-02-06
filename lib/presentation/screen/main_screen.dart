@@ -1,7 +1,5 @@
 import 'package:chat_app/business_logic/cubit/social_home_cubit.dart';
 import 'package:chat_app/presentation/resources/routes_manager.dart';
-import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -61,68 +59,7 @@ class MainScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: ConditionalBuilder(
-              condition: FirebaseAuth.instance.currentUser != null
-                  ? !FirebaseAuth.instance.currentUser!.emailVerified
-                  : true,
-              fallback: (context) {
-                return appCubit.widgets[appCubit.currentIndex];
-              },
-              builder: (context) {
-                //print(FirebaseAuth.instance.currentUser!.emailVerified);
-                return Container(
-                  height: 50.0,
-                  color: Colors.amber.withOpacity(0.7),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      //mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.info_outline),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        const Text(
-                          "Please Verify Your Email",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 90,
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            FirebaseAuth.instance.currentUser!
-                                .sendEmailVerification()
-                                .then((value) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  duration: Duration(seconds: 4),
-                                  content: Text("message send"),
-                                ),
-                              );
-                            }).catchError((error) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  duration: const Duration(seconds: 4),
-                                  content: Text(error.toString()),
-                                ),
-                              );
-                            });
-                          },
-                          child: const Text(
-                            "Send",
-                            style: TextStyle(
-                                color: Colors.blueAccent, fontSize: 18),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              }),
+          body: appCubit.widgets[appCubit.currentIndex],
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: appCubit.currentIndex,
             onTap: (index) {

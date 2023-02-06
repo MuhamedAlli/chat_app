@@ -86,7 +86,7 @@ class HomeScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 25.0,
                   backgroundImage: NetworkImage(
-                    postModel.image!,
+                    postModel.image??"",
                   ),
                 ),
                 const SizedBox(
@@ -97,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        postModel.username!,
+                        postModel.username??"",
                         textAlign: TextAlign.start,
                         style: Theme.of(context).textTheme.bodyLarge!.copyWith(
                               fontWeight: FontWeight.bold,
@@ -106,7 +106,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                       ),
                       Text(
-                        postModel.dateTime!,
+                        postModel.dateTime??"",
                         style: Theme.of(context)
                             .textTheme
                             .labelLarge!
@@ -134,7 +134,7 @@ class HomeScreen extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                postModel.text!,
+                postModel.text??"",
                 textAlign: TextAlign.start,
                 style: Theme.of(context)
                     .textTheme
@@ -147,7 +147,7 @@ class HomeScreen extends StatelessWidget {
                 clipBehavior: Clip.antiAliasWithSaveLayer,
                 margin: const EdgeInsets.only(top: 8.0),
                 child: Image.network(
-                  postModel.postImage!,
+                  postModel.postImage??"",
                   fit: BoxFit.cover,
                   height: 140,
                   width: double.infinity,
@@ -207,8 +207,8 @@ class HomeScreen extends StatelessWidget {
                       radius: 15.0,
                       backgroundImage: NetworkImage(
                         BlocProvider.of<SocialMainCubit>(context)
-                            .userModel!
-                            .image!,
+                            .userModel == null?"":BlocProvider.of<SocialMainCubit>(context)
+                            .userModel!.image??"",
                       ),
                     ),
                     const SizedBox(
